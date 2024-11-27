@@ -70,7 +70,8 @@ contract HelperConfig is Script, TestingUtils {
 
         address account = address(uint160(vm.envUint("ANVIL_ACCOUNT")));
         address serviceProvider = address(uint160(vm.envUint("ANVIL_SERVICE_PROVIDER_ACCOUNT")));
-        activeConfig = NetworkConfig({account: account, serviceProvider: serviceProvider, tokens: tokens, priceFeeds: priceFeeds});
+        activeConfig =
+            NetworkConfig({account: account, serviceProvider: serviceProvider, tokens: tokens, priceFeeds: priceFeeds});
 
         return activeConfig;
     }

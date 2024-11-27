@@ -27,21 +27,39 @@ The contract integrates with the `SubscriptionPlansRegistry` and `TokenPriceFeed
 
 By automating subscription charges and providing robust management capabilities, the `MemberBeatSubscriptionManager` contract offers a powerful solution for subscription-based services.
 
+## Installation  
+    
+1. **Install dependencies**:
+
+    ```
+    make install
+    ```
+   
+2. **Deploy the contract**:
+   
+    To deploy to a local anvil chain, run:
+
+    ```
+    make deploy   
+    ```
+
+    For Sepolia, run
+    ```
+    make deploy-sepolia
+    ```    
+
 ## Usage
 
-1. **Deploy the contract**:
-   Deploy the `MemberBeatSubscriptionManager` contract with the necessary parameters for the service provider and fee.
-
-2. **Manage Plans**:
+1. **Manage Plans**:
    - Use the `createPlan`, `updatePlan`, and `deletePlan` functions to manage subscription plans.
    - Use the `addBillingPlan`, `updateBillingPlan`, and `removeBillingPlan` functions to manage billing plans within subscription plans.
 
-3. **Handle Subscriptions**:
+2. **Handle Subscriptions**:
    - Users can subscribe to plans using the `subscribe` function.
    - Users can unsubscribe from plans using the `unsubscribe` function.
    - The contract handles charging subscriptions and managing billing cycles automatically.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
 

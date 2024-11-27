@@ -260,10 +260,10 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
      */
     function claimTokens() external onlyOwner {
         address[] memory tokens = s_chargedTokenAddresses;
-        uint256 tokensCount = tokens.length;        
+        uint256 tokensCount = tokens.length;
         for (uint256 i = 0; i < tokensCount; i++) {
-            IERC20 token = IERC20(tokens[i]);            
-            uint256 balance = token.balanceOf(address(this));                        
+            IERC20 token = IERC20(tokens[i]);
+            uint256 balance = token.balanceOf(address(this));
             token.safeTransfer(owner(), balance);
         }
         delete s_chargedTokenAddresses;
@@ -553,7 +553,7 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
                 if (!success) {
                     revert MemberBeatSubscriptionManager__TokenApprovalFailed(address(this), subscription.token);
                 }
-                token.safeTransferFrom(address(this), address(i_serviceProvider), serviceProviderFee);                
+                token.safeTransferFrom(address(this), address(i_serviceProvider), serviceProviderFee);
             }
         }
     }

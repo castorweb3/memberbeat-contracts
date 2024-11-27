@@ -680,12 +680,12 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         fiatSubscribes(RANDOM_USER, token1, PLAN_ID, ONE_MONTH_BILLING_PLAN_INDEX)
     {
         uint256 expectedBalance = IERC20(token1).balanceOf(address(subscriptionManager));
-        
+
         vm.startPrank(config.account);
-        subscriptionManager.claimTokens();        
+        subscriptionManager.claimTokens();
         vm.stopPrank();
 
-        uint256 actualBalance = IERC20(token1).balanceOf(config.account);        
+        uint256 actualBalance = IERC20(token1).balanceOf(config.account);
         assertEq(actualBalance, expectedBalance);
     }
 }

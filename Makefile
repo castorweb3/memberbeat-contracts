@@ -26,7 +26,7 @@ format :; forge fmt
 anvil :; anvil -m 'test test test test test test test test test test test junk' --steps-tracing --block-time 1
 
 deploy:	
-	@forge script script script/DeploySubscriptionManager.s.sol --rpc-url=http://localhost:8545 --account defaultKey --broadcast -vvvv
+	@forge script script/DeploySubscriptionManager.s.sol --rpc-url=http://localhost:8545 --account defaultKey --broadcast -vvvv
 
 deploy-sepolia:
-	@forge script script script/DeploySubscriptionManager.s.sol --rpc-url $(SEPOLIA_RPC_URL) --account $(ACCOUNT) --sender $(SENDER) --etherscan-api-key $(ETHERSCAN_API_KEY) --broadcast --verify
+	@forge script script/DeploySubscriptionManager.s.sol --rpc-url $(SEPOLIA_RPC_URL) --account $(ACCOUNT) --sender $(SENDER) --etherscan-api-key $(ETHERSCAN_API_KEY) --broadcast --verify

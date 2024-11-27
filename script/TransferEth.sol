@@ -20,8 +20,8 @@ import {Script} from "forge-std/Script.sol";
 contract TransferEth is Script {
     function run() public {
         vm.startBroadcast();
-        address receiver = vm.envAddress('ETH_RECEIVER_ADDRESS');
-        uint256 amount = vm.envUint('ETH_AMOUNT');        
+        address receiver = vm.envAddress("ETH_RECEIVER_ADDRESS");
+        uint256 amount = vm.envUint("ETH_AMOUNT");
 
         (bool success,) = payable(receiver).call{value: amount}("");
         require(success, "Transfer failed.");

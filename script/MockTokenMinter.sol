@@ -22,8 +22,8 @@ import {ERC20Mock} from "test/mocks/ERC20Mock.t.sol";
 
 contract MockTokenMinter is Script {
     function run() public {
-        address receiver = vm.envAddress('TOKEN_RECEIVER_ADDRESS');
-        uint256 amount = vm.envUint('TOKEN_AMOUNT');        
+        address receiver = vm.envAddress("TOKEN_RECEIVER_ADDRESS");
+        uint256 amount = vm.envUint("TOKEN_AMOUNT");
         mintTokens(receiver, amount);
     }
 
@@ -34,8 +34,8 @@ contract MockTokenMinter is Script {
 
         vm.startBroadcast();
         for (uint256 i = 0; i < tokens.length; i++) {
-            ERC20Mock mock = ERC20Mock(tokens[i]);            
-            mock.mint(receiver, amount);            
+            ERC20Mock mock = ERC20Mock(tokens[i]);
+            mock.mint(receiver, amount);
         }
         vm.stopBroadcast();
     }
