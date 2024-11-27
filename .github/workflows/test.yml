@@ -7,6 +7,8 @@ on:
 
 env:
   FOUNDRY_PROFILE: ci
+  ANVIL_ACCOUNT: ${{ secrets.ANVIL_ACCOUNT }}
+  ANVIL_SERVICE_PROVIDER_ACCOUNT: ${{ secrets.ANVIL_SERVICE_PROVIDER_ACCOUNT }}
 
 jobs:
   check:
