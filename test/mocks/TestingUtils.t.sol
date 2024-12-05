@@ -20,13 +20,14 @@ import {Test, console} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 
 abstract contract TestingUtils is Test, MemberBeatDataTypes {
-    int256 public constant SERVICE_PROVIDER_FEE = 1000000 gwei; // 0.1% or 0.001
+    int256 public constant SERVICE_PROVIDER_FEE = 10000000000000000 wei; // 0.1% or 0.001
 
     uint256 public constant SEPOLIA_CHAIN_ID = 111555111;
-    uint8 public constant DECIMALS = 8;
+    uint256 public constant ARBITRUM_SEPOLIA_CHAIN_ID = 421614;
+    uint8 public constant DECIMALS = 8;    
     uint256 public constant ETH_FIAT_PRICE = 1734e8;
     uint256 public constant NEW_ETH_FIAT_PRICE = 1629e8;
-    uint256 public constant BTC_FIAT_PRICE = 2129e8;
+    uint256 public constant BTC_FIAT_PRICE = 2129e8;    
     int256 public constant INVALID_FIAT_PRICE = -1;
 
     uint256 public constant ONE_MONTH_FIAT_PRICE = 49 ether;

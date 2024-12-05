@@ -35,7 +35,7 @@ contract SubscriptionManagerUnitTest is Test, MemberBeatDataTypes, TestingUtils 
     }
 
     function testCalculateServiceProviderFee() public view {
-        uint256 amount = 1234567891234567890;
+        uint256 amount = 234567000000000000;
         console.log("amount", amount);
         uint256 actualFee = subscriptionManager.calculateServiceProviderFee(amount);
         console.log("   fee", actualFee);

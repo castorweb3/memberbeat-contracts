@@ -112,11 +112,10 @@ interface IMemberBeatSubscriptionManager is MemberBeatDataTypes {
     function updateTokenPriceFeed(address _tokenAddress, address _newPriceFeedAddress) external;
 
     /**
-     * @notice Retrieves the price feed address for a token.
+     * @notice Removes the price feed address for a token.
      * @param _tokenAddress The address of the token.
-     * @return Returns the address of the price feed.
      */
-    function getTokenPriceFeed(address _tokenAddress) external view returns (address);
+    function deleteTokenPriceFeed(address _tokenAddress) external;
 
     /**
      * @notice Checks if a token is registered.

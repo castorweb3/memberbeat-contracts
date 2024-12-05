@@ -15,7 +15,7 @@
 
 pragma solidity 0.8.20;
 
-import {Script} from "forge-std/Script.sol";
+import {Script, console} from "forge-std/Script.sol";
 import {TokenPriceFeedRegistry} from "src/registry/TokenPriceFeedRegistry.sol";
 import {MockV3Aggregator} from "test/mocks/MockV3Aggregator.t.sol";
 import {ERC20Mock} from "test/mocks/ERC20Mock.t.sol";
@@ -36,6 +36,8 @@ contract HelperConfig is Script, TestingUtils {
     constructor() {
         if (block.chainid == SEPOLIA_CHAIN_ID) {
             activeConfig = getSepoliaEthConfig();
+        } else if (block.chainid == ARBITRUM_SEPOLIA_CHAIN_ID) {
+            activeConfig = getArbitrumSepoliaEthConfig();
         } else {
             activeConfig = getOrCreateAnvilEthConfig();
         }
@@ -46,6 +48,25 @@ contract HelperConfig is Script, TestingUtils {
     }
 
     function getSepoliaEthConfig() public view returns (NetworkConfig memory) {
+        return activeConfig;
+    }
+
+    function getArbitrumSepoliaEthConfig() public returns (NetworkConfig memory) {
+        address account = address(uint160(vm.envUint("OWNER_ACCOUNT")));
+        address serviceProvider = address(uint160(vm.envUint("SERVICE_PROVIDER_ACCOUNT")));
+
+        console.log("Arbitrum account", account);
+        console.log("Arbitrum provider", serviceProvider);
+
+        address[] memory _tokens = new address[](0);
+        address[] memory _priceFeeds = new address[](0);
+
+        activeConfig = NetworkConfig({
+            account: account,
+            serviceProvider: serviceProvider,
+            tokens: _tokens,
+            priceFeeds: _priceFeeds
+        });
         return activeConfig;
     }
 
@@ -66,7 +87,7 @@ contract HelperConfig is Script, TestingUtils {
         priceFeeds.push(address(ethFiatPriceFeed));
 
         tokens.push(address(btcMock));
-        priceFeeds.push(address(btcFiatPriceFeed));
+        priceFeeds.push(address(btcFiatPriceFeed));        
 
         address account = address(uint160(vm.envUint("ANVIL_ACCOUNT")));
         address serviceProvider = address(uint160(vm.envUint("ANVIL_SERVICE_PROVIDER_ACCOUNT")));

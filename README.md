@@ -48,6 +48,11 @@ By automating subscription charges and providing robust management capabilities,
     make deploy-sepolia
     ```    
 
+    For Arbitrum Sepolia, run
+    ```
+    make deploy-arbitrum-sepolia
+    ```
+
 ## Usage
 
 1. **Manage Plans**:
@@ -62,4 +67,16 @@ By automating subscription charges and providing robust management capabilities,
 ## License
 
 This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
+
+## Demo Arbitrum Sepolia deployment
+
+##### arbitrum-sepolia
+✅  [Success]Hash: 0xd1c3282a93d20ab54141d66a3ac6065454caf935bfd20062bb169f1d408aca0f
+Contract Address: 0x0D27195dC9c7196A0576F7582C09fA3d2D0B254d
+Block: 103421025
+Paid: 0.0005981722 ETH (5981722 gas * 0.1 gwei)
+
+✅ Sequence #1 on arbitrum-sepolia | Total Paid: 0.0005981722 ETH (5981722 gas * avg 0.1 gwei)
+                                                                                                                                                                                                                                 
+==========================
 

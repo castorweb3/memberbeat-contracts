@@ -65,14 +65,6 @@ contract PriceFeedRegistryUnitTest is Test, TestingUtils {
         subscriptionManager.addTokenPriceFeed(TOKEN_ADDRESS, PRICE_FEED_ADDRESS);
     }
 
-    function testAddTokenPriceHasCorrectFeedAddress() public {
-        vm.prank(config.account);
-        subscriptionManager.addTokenPriceFeed(TOKEN_ADDRESS, PRICE_FEED_ADDRESS);
-
-        address actualPriceFeed = subscriptionManager.getTokenPriceFeed(TOKEN_ADDRESS);
-        assertEq(actualPriceFeed, PRICE_FEED_ADDRESS);
-    }
-
     function testAddTokenPriceRegistersAToken() public {
         vm.prank(config.account);
         subscriptionManager.addTokenPriceFeed(TOKEN_ADDRESS, PRICE_FEED_ADDRESS);
@@ -97,22 +89,22 @@ contract PriceFeedRegistryUnitTest is Test, TestingUtils {
         subscriptionManager.updateTokenPriceFeed(RANDOM_TOKEN, NEW_PRICE_FEED_ADDRESS);
     }
 
-    function testUpdateTokenPriceFeedUpdatesTheFeedAddress() public addedTokenPriceFeed {
-        vm.prank(config.account);
-        subscriptionManager.updateTokenPriceFeed(TOKEN_ADDRESS, NEW_PRICE_FEED_ADDRESS);
-
-        address actualPriceFeed = subscriptionManager.getTokenPriceFeed(TOKEN_ADDRESS);
-        assertEq(actualPriceFeed, NEW_PRICE_FEED_ADDRESS);
-    }
-
-    function testGetTokenPriceFeedRevertsIfTokenNotRegistered() public {
+    function testDeleteTokenPriceFeedRevertsIfTokenNotRegistered() public {
         vm.prank(config.account);
         vm.expectRevert(
             abi.encodeWithSelector(
                 TokenPriceFeedRegistry.TokenPriceFeedRegistry__TokenNotRegistered.selector, TOKEN_ADDRESS
             )
         );
-        subscriptionManager.getTokenPriceFeed(TOKEN_ADDRESS);
+        subscriptionManager.deleteTokenPriceFeed(TOKEN_ADDRESS);
+    }
+
+    function testDeleteTokenPriceDeletesTheToken() public addedTokenPriceFeed {
+        vm.prank(config.account);
+        subscriptionManager.deleteTokenPriceFeed(TOKEN_ADDRESS);
+
+        bool isRegistered = subscriptionManager.isTokenRegistered(TOKEN_ADDRESS);
+        assertEq(isRegistered, false);
     }
 
     function testGetLatestPriceRevertsIfInvalidToken() public {

@@ -1,6 +1,6 @@
 -include .env
 
-.PHONY: all test clean deploy fund help install snapshot format anvil install deploy deploy-sepolia verify
+.PHONY: all test clean deploy fund help install snapshot format anvil install deploy deploy-sepolia deploy-arbitrum-sepolia verify
 
 all: clean remove install update build
 
@@ -26,7 +26,16 @@ format :; forge fmt
 anvil :; anvil -m 'test test test test test test test test test test test junk' --steps-tracing --block-time 1
 
 deploy:	
-	@forge script script/DeploySubscriptionManager.s.sol --rpc-url=http://localhost:8545 --account defaultKey --broadcast -vvvv
+	@forge script script/DeploySubscriptionManager.s.sol --rpc-url=http://127.0.0.1:8545 --account defaultKey --broadcast -vvvv
+
+mint-tokens:
+	@forge script script/MockTokenMinter.sol --rpc-url http://127.0.0.1:8545 --account defaultKey --broadcast -vvvv
+
+transfer-eth:
+	@forge script script/TransferEth.sol --rpc-url http://127.0.0.1:8545 --account defaultKey --broadcast -vvvv
 
 deploy-sepolia:
 	@forge script script/DeploySubscriptionManager.s.sol --rpc-url $(SEPOLIA_RPC_URL) --account $(ACCOUNT) --sender $(SENDER) --etherscan-api-key $(ETHERSCAN_API_KEY) --broadcast --verify
+
+deploy-arbitrum-sepolia:
+	@forge script script/DeploySubscriptionManager.s.sol --rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) --account $(ACCOUNT) --etherscan-api-key $(ETHERSCAN_API_KEY) --broadcast --verify -vvvv

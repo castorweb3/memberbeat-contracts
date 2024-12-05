@@ -64,16 +64,25 @@ contract TokenPriceFeedRegistry {
     }
 
     /**
-     * @notice Retrieves the price feed address for a token.
+     * @notice Removes the price feed address for a token.
      * @param _tokenAddress The address of the token.
-     * @return The address of the price feed.
      * @dev Reverts if the token is not registered.
      */
-    function getTokenPriceFeed(address _tokenAddress) public view returns (address) {
+    function deleteTokenPriceFeed(address _tokenAddress) public {
         if (!s_validTokens[_tokenAddress]) {
             revert TokenPriceFeedRegistry__TokenNotRegistered(_tokenAddress);
         }
-        return s_tokenPriceFeeds[_tokenAddress].priceFeedAddress;
+
+        delete s_tokenPriceFeeds[_tokenAddress];
+
+        s_validTokens[_tokenAddress] = false;
+        for (uint256 i = 0; i < s_tokens.length; i++) {
+            if (s_tokens[i] == _tokenAddress) {
+                s_tokens[i] = s_tokens[s_tokens.length - 1];
+                s_tokens.pop();
+                break;
+            }
+        }
     }
 
     /**
@@ -117,5 +126,18 @@ contract TokenPriceFeedRegistry {
             return 0;
         }
         return _fiatAmount * 1e18 / price;
+    }
+
+    /**
+     * @notice Retrieves the price feed address for a token.
+     * @param _tokenAddress The address of the token.
+     * @return The address of the price feed.
+     * @dev Reverts if the token is not registered.
+     */
+    function getTokenPriceFeed(address _tokenAddress) private view returns (address) {
+        if (!s_validTokens[_tokenAddress]) {
+            revert TokenPriceFeedRegistry__TokenNotRegistered(_tokenAddress);
+        }
+        return s_tokenPriceFeeds[_tokenAddress].priceFeedAddress;
     }
 }
