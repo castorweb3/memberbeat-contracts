@@ -87,7 +87,7 @@ contract HelperConfig is Script, TestingUtils {
         priceFeeds.push(address(ethFiatPriceFeed));
 
         tokens.push(address(btcMock));
-        priceFeeds.push(address(btcFiatPriceFeed));        
+        priceFeeds.push(address(btcFiatPriceFeed));
 
         address account = address(uint160(vm.envUint("ANVIL_ACCOUNT")));
         address serviceProvider = address(uint160(vm.envUint("ANVIL_SERVICE_PROVIDER_ACCOUNT")));

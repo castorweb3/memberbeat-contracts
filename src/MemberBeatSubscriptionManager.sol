@@ -153,11 +153,11 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
         emit SubscriptionCreated(msg.sender, _token, _planId, billingPlan);
 
         uint256 tokenAmount = 0;
-        if (status == Status.Active) {                        
+        if (status == Status.Active) {
             tokenAmount = chargeSubscription(newIndex, subscription);
-        } else {            
+        } else {
             scheduleSubscription(newIndex, subscription);
-        }        
+        }
 
         return (subscription, tokenAmount);
     }
@@ -299,7 +299,7 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
 
     /**
      * @notice Removes the price feed address for a token.
-     * @param _tokenAddress The address of the token.     
+     * @param _tokenAddress The address of the token.
      */
     function deleteTokenPriceFeed(address _tokenAddress) external onlyOwner {
         i_tokenPriceFeedRegistry.deleteTokenPriceFeed(_tokenAddress);
@@ -354,7 +354,7 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
      * @notice Checks if the caller is the owner of the contract.
      * @return Returns true if the caller is the owner, otherwise false.
      */
-    function isOwner() external view returns (bool) {                
+    function isOwner() external view returns (bool) {
         return msg.sender == owner();
     }
 
@@ -419,9 +419,9 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
      * @param amount The amount to calculate the fee for.
      * @return The calculated service provider fee.
      */
-    function calculateServiceProviderFee(uint256 amount) public view returns (uint256) {        
-        uint256 scaledAmount = amount * uint256(i_serviceProviderFee);        
-        uint256 fee = (scaledAmount + SERVICE_PROVIDER_FEE_FACTOR - 1) / SERVICE_PROVIDER_FEE_FACTOR;        
+    function calculateServiceProviderFee(uint256 amount) public view returns (uint256) {
+        uint256 scaledAmount = amount * uint256(i_serviceProviderFee);
+        uint256 fee = (scaledAmount + SERVICE_PROVIDER_FEE_FACTOR - 1) / SERVICE_PROVIDER_FEE_FACTOR;
         return fee;
     }
 
@@ -509,7 +509,7 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
         private
         returns (uint256 tokenAmount)
     {
-        BillingPlan memory billingPlan = subscription.billingPlan;        
+        BillingPlan memory billingPlan = subscription.billingPlan;
 
         uint256 tokenIndex = findBillingPlanTokenIndex(billingPlan, subscription.token);
 
@@ -524,7 +524,7 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
                     subscription.planId, subscription.account, subscription.token
                 );
             }
-        }        
+        }
 
         subscription.nextChargeTimestamp = getNextChargeTimestamp(subscription);
         subscription.billingCycle++;
@@ -552,7 +552,7 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
                 if (!success) {
                     revert MemberBeatSubscriptionManager__TokenApprovalFailed(address(this), subscription.token);
                 }
-                token.safeTransferFrom(address(this), address(i_serviceProvider), serviceProviderFee);                
+                token.safeTransferFrom(address(this), address(i_serviceProvider), serviceProviderFee);
             }
         }
     }
