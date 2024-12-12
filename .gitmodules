@@ -13,3 +13,6 @@
 [submodule "lib/solidity-datetime"]
 	path = lib/solidity-datetime
 	url = https://github.com/rollaProject/solidity-datetime
+[submodule "lib/memberbeat-token"]
+	path = lib/memberbeat-token
+	url = https://github.com/castorweb3/memberbeat-token

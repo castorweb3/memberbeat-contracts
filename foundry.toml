@@ -5,7 +5,8 @@ libs = ["lib"]
 remappings = [
     "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
     "@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/src/",
-    "@solidity-datetime/contracts/=lib/solidity-datetime/contracts/"
+    "@solidity-datetime/contracts/=lib/solidity-datetime/contracts/",
+    "@memberbeat-token/=lib/memberbeat-token/src/"
 ]
 fs_permissions = [{ access = "read", path = "./broadcast" }]
 

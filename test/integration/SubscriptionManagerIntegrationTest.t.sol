@@ -17,6 +17,7 @@ pragma solidity 0.8.20;
 
 import {Test, console} from "forge-std/Test.sol";
 import {
+    IMemberBeatSubscriptionManager,
     MemberBeatSubscriptionManager,
     SubscriptionPlansRegistry,
     TokenPriceFeedRegistry,
@@ -140,13 +141,13 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
 
     function testSubscribeRevertsIfPlanIsInvalid() public addedFiatPlanData {
         vm.prank(RANDOM_USER);
-        vm.expectRevert(MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__InvalidSubscriptionData.selector);
+        vm.expectRevert(IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__InvalidSubscriptionData.selector);
         subscriptionManager.subscribe(INVALID_PLAN_ID, ONE_MONTH_BILLING_PLAN_INDEX, tokens[0], block.timestamp);
     }
 
     function testSubscribeRevertsIfTokenIsInvalid() public addedFiatPlanData {
         vm.prank(RANDOM_USER);
-        vm.expectRevert(MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__InvalidSubscriptionData.selector);
+        vm.expectRevert(IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__InvalidSubscriptionData.selector);
         subscriptionManager.subscribe(PLAN_ID, ONE_MONTH_BILLING_PLAN_INDEX, INVALID_TOKEN, block.timestamp);
     }
 
@@ -159,7 +160,7 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         vm.prank(RANDOM_USER);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__AlreadySubscribed.selector,
+                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__AlreadySubscribed.selector,
                 RANDOM_USER,
                 PLAN_ID
             )
@@ -193,7 +194,7 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         vm.prank(RANDOM_USER);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__TokenNotAllowed.selector, RANDOM_TOKEN
+                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__TokenNotAllowed.selector, RANDOM_TOKEN
             )
         );
         subscriptionManager.subscribe(PLAN_ID, ONE_MONTH_BILLING_PLAN_INDEX, RANDOM_TOKEN, block.timestamp);
@@ -206,7 +207,7 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         vm.prank(RANDOM_USER);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__TokenAmountCalculationFailed.selector,
+                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__TokenAmountCalculationFailed.selector,
                 PLAN_ID,
                 RANDOM_USER,
                 token1
@@ -219,7 +220,7 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         vm.prank(RANDOM_USER);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__AllowanceTooLow.selector, RANDOM_USER
+                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__AllowanceTooLow.selector, RANDOM_USER
             )
         );
         subscriptionManager.subscribe(PLAN_ID, ONE_MONTH_BILLING_PLAN_INDEX, token1, block.timestamp);
@@ -287,6 +288,10 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         vm.prank(RANDOM_USER);
         Subscription[] memory createdSubscriptions = subscriptionManager.getSubscriptions();
         assertEq(createdSubscriptions.length, 1);
+
+        uint256 expectedMbTokenBalance = tokenAmountSpent;
+        uint256 actualMbTokenBalance = IERC20(config.memberBeatToken).balanceOf(RANDOM_USER);
+        assertEq(expectedMbTokenBalance, actualMbTokenBalance);
     }
 
     function testSubscribeCreatesAPendingSubscription()
@@ -364,6 +369,26 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         assertEq(planId, PLAN_ID);
     }
 
+    function testSubscribeAddsTokenToChargedTokenAddresses()
+        public
+        addedFiatPlanData
+        approvesToken(RANDOM_USER, token1, ONE_MONTH_BILLING_PLAN_INDEX)
+        fiatSubscribes(RANDOM_USER, token1, PLAN_ID, ONE_MONTH_BILLING_PLAN_INDEX)
+    {
+        vm.startPrank(config.account);                        
+        
+        address[] memory chargedTokens = subscriptionManager.getChargedTokenAddresses();
+        uint256 chargedTokensCount = chargedTokens.length;
+        bool found = false;
+        for (uint256 i = 0; i < chargedTokensCount; i++) {
+            if (chargedTokens[i] == token1) {
+                found = true;
+            }
+        }
+        assert(found);
+        vm.stopPrank();        
+    }
+
     function testGetSubscribeRevertsIfUserNotSubscribed()
         public
         addedFiatPlanData
@@ -372,7 +397,7 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
     {
         vm.expectRevert(
             abi.encodeWithSelector(
-                MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__NotSubscribed.selector,
+                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__NotSubscribed.selector,
                 POOR_USER,
                 ONE_MONTH_BILLING_PLAN_INDEX
             )
@@ -389,7 +414,7 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         vm.prank(RANDOM_USER);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__NotSubscribed.selector,
+                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__NotSubscribed.selector,
                 RANDOM_USER,
                 PLAN_ID
             )
@@ -407,7 +432,7 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         subscriptionManager.unsubscribe(PLAN_ID);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__NotSubscribed.selector,
+                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__NotSubscribed.selector,
                 RANDOM_USER,
                 PLAN_ID
             )
@@ -457,7 +482,7 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         subscriptionManager.unsubscribe(PLAN_ID);
         vm.expectRevert(
             abi.encodeWithSelector(
-                MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__NotSubscribed.selector,
+                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__NotSubscribed.selector,
                 RANDOM_USER,
                 PLAN_ID
             )
@@ -573,7 +598,7 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         uint256 index = 0;
         vm.expectRevert(
             abi.encodeWithSelector(
-                MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__SubscriptionNotFound.selector, index
+                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__SubscriptionNotFound.selector, index
             )
         );
         subscriptionManager.getSubscriptionAtIndex(index);
@@ -603,7 +628,7 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         uint256 index = 0;
         vm.expectRevert(
             abi.encodeWithSelector(
-                MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__SubscriptionNotFound.selector, index
+                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__SubscriptionNotFound.selector, index
             )
         );
         subscriptionManager.handleSubscriptionCharge(index);
@@ -682,10 +707,71 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         uint256 expectedBalance = IERC20(token1).balanceOf(address(subscriptionManager));
 
         vm.startPrank(config.account);
-        subscriptionManager.claimTokens();
+        subscriptionManager.claimTokenBalance(token1);
         vm.stopPrank();
 
         uint256 actualBalance = IERC20(token1).balanceOf(config.account);
         assertEq(actualBalance, expectedBalance);
+    }
+
+    function testClaimTokenBalanceRevertsIfBalanceZero()
+        public
+        addedFiatPlanData
+        approvesToken(RANDOM_USER, token1, ONE_MONTH_BILLING_PLAN_INDEX)
+        fiatSubscribes(RANDOM_USER, token1, PLAN_ID, ONE_MONTH_BILLING_PLAN_INDEX)
+    {
+        vm.startPrank(config.account);                
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__TokenBalanceZero.selector,
+                token2     
+            )
+        );
+        subscriptionManager.claimTokenBalance(token2);        
+        vm.stopPrank();        
+    }
+
+    function testClaimTokenBalanceEmitsTokenBalanceClaimedEvent()
+        public
+        addedFiatPlanData
+        approvesToken(RANDOM_USER, token1, ONE_MONTH_BILLING_PLAN_INDEX)
+        fiatSubscribes(RANDOM_USER, token1, PLAN_ID, ONE_MONTH_BILLING_PLAN_INDEX)
+    {
+        uint256 expectedBalance = IERC20(token1).balanceOf(address(subscriptionManager));
+
+        vm.startPrank(config.account);                        
+        subscriptionManager.claimTokenBalance(token1);        
+        vm.stopPrank();        
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        (Vm.Log memory tokenBalanceClaimedEvent, bool found) =
+            findEvent(entries, "TokenBalanceClaimed(address,uint256)");
+        assert(found);
+
+        address actualToken = address(uint160(uint256(tokenBalanceClaimedEvent.topics[1])));
+        uint256 actualBalance = uint256(tokenBalanceClaimedEvent.topics[2]);
+        assertEq(token1, actualToken);
+        assertEq(expectedBalance, actualBalance);
+    }
+
+    function testClaimTokenBalanceRemovesTokenFromChargedTokenAddresses()
+        public
+        addedFiatPlanData
+        approvesToken(RANDOM_USER, token1, ONE_MONTH_BILLING_PLAN_INDEX)
+        fiatSubscribes(RANDOM_USER, token1, PLAN_ID, ONE_MONTH_BILLING_PLAN_INDEX)
+    {
+        vm.startPrank(config.account);                        
+        subscriptionManager.claimTokenBalance(token1);        
+        
+        address[] memory chargedTokens = subscriptionManager.getChargedTokenAddresses();
+        uint256 chargedTokensCount = chargedTokens.length;
+        bool found = false;
+        for (uint256 i = 0; i < chargedTokensCount; i++) {
+            if (chargedTokens[i] == token1) {
+                found = true;
+            }
+        }
+        assert(!found);
+        vm.stopPrank();        
     }
 }

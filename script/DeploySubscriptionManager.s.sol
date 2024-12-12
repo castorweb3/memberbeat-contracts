@@ -18,6 +18,7 @@ pragma solidity 0.8.20;
 import {Script} from "forge-std/Script.sol";
 import {MemberBeatSubscriptionManager, TokenPriceFeedRegistry} from "src/MemberBeatSubscriptionManager.sol";
 import {HelperConfig} from "script/HelperConfig.s.sol";
+import {MemberBeatToken} from "@memberbeat-token/MemberBeatToken.sol";
 
 contract DeploySubscriptionManager is Script {
     function run() public {
@@ -33,7 +34,9 @@ contract DeploySubscriptionManager is Script {
 
         vm.startBroadcast(config.account);
         MemberBeatSubscriptionManager subscriptionManager =
-            new MemberBeatSubscriptionManager(config.serviceProvider, serviceProviderFee);
+            new MemberBeatSubscriptionManager(config.serviceProvider, serviceProviderFee, config.memberBeatToken);
+
+        MemberBeatToken(config.memberBeatToken).setSubscriptionManager(address(subscriptionManager));
 
         address[] memory tokens = config.tokens;
         for (uint256 i = 0; i < tokens.length; i++) {
