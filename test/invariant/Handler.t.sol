@@ -16,7 +16,12 @@
 pragma solidity 0.8.20;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MemberBeatSubscriptionManager, MemberBeatDataTypes, DateTime} from "src/MemberBeatSubscriptionManager.sol";
+import {
+    MemberBeatSubscriptionManager,
+    IMemberBeatSubscriptionManager,
+    MemberBeatDataTypes,
+    DateTime
+} from "src/MemberBeatSubscriptionManager.sol";
 
 contract Handler is Test, MemberBeatDataTypes {
     MemberBeatSubscriptionManager subscriptionManager;
@@ -111,7 +116,7 @@ contract Handler is Test, MemberBeatDataTypes {
             bytes4 errorSignature = bytes4(lowLevelData);
             if (
                 errorSignature
-                    != MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__AlreadySubscribed.selector
+                    != IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__AlreadySubscribed.selector
             ) {
                 assembly {
                     revert(add(lowLevelData, 0x20), mload(lowLevelData))
@@ -136,7 +141,8 @@ contract Handler is Test, MemberBeatDataTypes {
             totalUnsubscribes++;
         } catch (bytes memory lowLevelData) {
             bytes4 errorSignature = bytes4(lowLevelData);
-            if (errorSignature != MemberBeatSubscriptionManager.MemberBeatSubscriptionManager__NotSubscribed.selector) {
+            if (errorSignature != IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__NotSubscribed.selector)
+            {
                 assembly {
                     revert(add(lowLevelData, 0x20), mload(lowLevelData))
                 }

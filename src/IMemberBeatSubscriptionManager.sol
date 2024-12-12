@@ -22,6 +22,30 @@ import {MemberBeatDataTypes} from "src/common/MemberBeatDataTypes.sol";
  * @notice Interface for managing MemberBeat subscriptions and plans.
  */
 interface IMemberBeatSubscriptionManager is MemberBeatDataTypes {
+    error MemberBeatSubscriptionManager__InvalidServiceProviderAddress();
+    error MemberBeatSubscriptionManager__InvalidSubscriptionData();
+    error MemberBeatSubscriptionManager__AlreadySubscribed(address account, uint256 planId);
+    error MemberBeatSubscriptionManager__NotSubscribed(address account, uint256 planId);
+    error MemberBeatSubscriptionManager__TokenNotAllowed(address token);
+    error MemberBeatSubscriptionManager__TokenAmountCalculationFailed(uint256 planId, address account, address token);
+    error MemberBeatSubscriptionManager__AllowanceTooLow(address account);
+    error MemberBeatSubscriptionManager__TokenApprovalFailed(address account, address token);
+    error MemberBeatSubscriptionManager__TokenFeeTransferFailed(address account, address token, uint256 fee);
+    error MemberBeatSubscriptionManager__InvalidBillingPeriod(uint256 period);
+    error MemberBeatSubscriptionManager__SubscriptionNotDue(uint256 subscriptionIndex);
+    error MemberBeatSubscriptionManager__SubscriptionNotFound(uint256 subscriptionIndex);
+    error MemberBeatSubscriptionManager__TokenBalanceZero(address token);
+
+    event SubscriptionCreated(
+        address indexed account, address indexed token, uint256 indexed planId, BillingPlan billingPlan
+    );
+    event SubscriptionCharged(
+        address indexed account, uint256 indexed billingCycle, address indexed token, uint256 tokenAmount
+    );
+    event SubscriptionCancelled(address indexed account, uint256 indexed planId);
+    event SubscriptionDueForCharge(uint256 indexed subscriptionIndex);
+    event TokenBalanceClaimed(address indexed token, uint256 indexed balance);
+
     /**
      * @notice Subscribes a user to a plan.
      * @param _planId The ID of the plan to subscribe to.
@@ -96,6 +120,19 @@ interface IMemberBeatSubscriptionManager is MemberBeatDataTypes {
      * @param _billingPlanIndex The index of the billing plan within the plan.
      */
     function removeBillingPlan(uint256 _planId, uint8 _billingPlanIndex) external;
+
+    /**
+     * @notice Retrieves the addresses of the tokens that are currently being charged.
+     * @dev This function can be called externally to fetch the token addresses.
+     * @return A list of addresses of the tokens that are being charged.
+     */
+    function getChargedTokenAddresses() external returns (address[] memory);
+
+    /**
+     * @notice Transfers the balance of the specified token from the contract to the owner's wallet.
+     * @param _token The address of the token to be transferred and removed from the charged token addresses list.
+     */
+    function claimTokenBalance(address _token) external;
 
     /**
      * @notice Adds a price feed address for a token.

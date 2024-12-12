@@ -23,6 +23,7 @@ import {MemberBeatDataTypes} from "src/common/MemberBeatDataTypes.sol";
 import {SubscriptionPlansRegistry} from "src/registry/SubscriptionPlansRegistry.sol";
 import {TokenPriceFeedRegistry} from "src/registry/TokenPriceFeedRegistry.sol";
 import {DateTime} from "@solidity-datetime/contracts/DateTime.sol";
+import {IMemberBeatToken} from "@memberbeat-token/IMemberBeatToken.sol";
 
 /**
  * @title MemberBeatSubscriptionManager
@@ -63,40 +64,16 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
     // Address of the service provider
     address private immutable i_serviceProvider;
 
+    // Address of the MemberBeatToken contract
+    IMemberBeatToken private immutable i_memberBeatToken;
+
     // Fee charged by the service provider
     int256 private immutable i_serviceProviderFee;
 
     // Factor for calculating the service provider fee
     uint256 public constant SERVICE_PROVIDER_FEE_FACTOR = 1e18;
 
-    event SubscriptionCreated(
-        address indexed account, address indexed token, uint256 indexed planId, BillingPlan billingPlan
-    );
-    event SubscriptionCharged(
-        address indexed account, uint256 indexed billingCycle, address indexed token, uint256 tokenAmount
-    );
-    event SubscriptionCancelled(address indexed account, uint256 indexed planId);
-    event SubscriptionDueForCharge(uint256 indexed subscriptionIndex);
-
-    error MemberBeatSubscriptionManager__InvalidServiceProviderAddress();
-    error MemberBeatSubscriptionManager__InvalidSubscriptionData();
-    error MemberBeatSubscriptionManager__AlreadySubscribed(address account, uint256 planId);
-    error MemberBeatSubscriptionManager__NotSubscribed(address account, uint256 planId);
-    error MemberBeatSubscriptionManager__TokenNotAllowed(address token);
-    error MemberBeatSubscriptionManager__TokenAmountCalculationFailed(uint256 planId, address account, address token);
-    error MemberBeatSubscriptionManager__AllowanceTooLow(address account);
-    error MemberBeatSubscriptionManager__TokenApprovalFailed(address account, address token);
-    error MemberBeatSubscriptionManager__TokenFeeTransferFailed(address account, address token, uint256 fee);
-    error MemberBeatSubscriptionManager__InvalidBillingPeriod(uint256 period);
-    error MemberBeatSubscriptionManager__SubscriptionNotDue(uint256 subscriptionIndex);
-    error MemberBeatSubscriptionManager__SubscriptionNotFound(uint256 subscriptionIndex);
-
-    modifier onlyAuthorized() {
-        _checkOwner();
-        _;
-    }
-
-    constructor(address _serviceProvider, int256 _serviceProviderFee) Ownable(msg.sender) {
+    constructor(address _serviceProvider, int256 _serviceProviderFee, address _memberBeatToken) Ownable(msg.sender) {
         if (_serviceProvider == address(0)) {
             revert MemberBeatSubscriptionManager__InvalidServiceProviderAddress();
         }
@@ -104,6 +81,7 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
         i_subscriptionPlansRegistry = new SubscriptionPlansRegistry();
         i_tokenPriceFeedRegistry = new TokenPriceFeedRegistry();
         i_serviceProvider = _serviceProvider;
+        i_memberBeatToken = IMemberBeatToken(_memberBeatToken);
         i_serviceProviderFee = _serviceProviderFee;
     }
 
@@ -253,20 +231,40 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
     }
 
     /**
-     * @notice Transfers the balances of all charged tokens from the contract to the owner's wallet.
-     * @dev This function retrieves the list of charged token addresses, transfers their balances to the owner's address, and then resets the list of charged token addresses.
-     * @dev This function can only be called by the contract owner.
-     * @dev Since this function is for the owner only, and the tokens are in our control, it is safe to loop and transfer.
+     * @notice Retrieves the addresses of the tokens that are currently being charged.
+     * @dev This function can be called externally to fetch the token addresses.
+     * @return A list of addresses of the tokens that are being charged.
      */
-    function claimTokens() external onlyOwner {
-        address[] memory tokens = s_chargedTokenAddresses;
-        uint256 tokensCount = tokens.length;
-        for (uint256 i = 0; i < tokensCount; i++) {
-            IERC20 token = IERC20(tokens[i]);
-            uint256 balance = token.balanceOf(address(this));
-            token.safeTransfer(owner(), balance);
+    function getChargedTokenAddresses() external view returns (address[] memory) {
+        return s_chargedTokenAddresses;
+    }
+
+    /**
+     * @notice Transfers the balance of the specified token from the contract to the owner's wallet.
+     * @dev This function retrieves the token balance, transfers it to the owner's address, emits the TokenBalanceClaimed event, and then removes the token address from the charged token addresses list.
+     * @dev This function can only be called by the contract owner.
+     * @dev Since this function is for the owner only, and the tokens are in our control, it is safe to loop through the array and delete.
+     * @dev Emits the TokenBalanceClaimed event indicating the token address and balance transferred.
+     * @param _token The address of the token to be transferred and removed from the charged token addresses list.
+     */
+    function claimTokenBalance(address _token) external onlyOwner {
+        IERC20 token = IERC20(_token);
+        uint256 balance = token.balanceOf(address(this));
+        if (balance == 0) {
+            revert MemberBeatSubscriptionManager__TokenBalanceZero(_token);
         }
-        delete s_chargedTokenAddresses;
+
+        emit TokenBalanceClaimed(_token, balance);
+
+        token.safeTransfer(owner(), balance);
+
+        for (uint256 i = 0; i < s_chargedTokenAddresses.length; i++) {
+            if (s_chargedTokenAddresses[i] == _token) {
+                s_chargedTokenAddresses[i] = s_chargedTokenAddresses[s_chargedTokenAddresses.length - 1];
+                s_chargedTokenAddresses.pop();
+                break;
+            }
+        }
     }
 
     /**
@@ -362,8 +360,8 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
      * @notice Processes subscriptions that are due for charge.
      * @dev This function checks each subscription scheduled for today and emits an event if the subscription is due for a charge.
      */
-    function processDueSubscriptions() external onlyAuthorized {
-        uint256 currentDay = block.timestamp / 1 days * 1 days;
+    function processDueSubscriptions() external {
+        uint256 currentDay = (block.timestamp / 86400) * 86400;
         uint256[] storage subscriptionIndexes = s_subscriptionsByChargeDay[currentDay];
         for (uint256 j = 0; j < subscriptionIndexes.length; j++) {
             uint256 subscriptionIndex = subscriptionIndexes[j];
@@ -382,7 +380,7 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
      * @dev This function checks if a subscription is due for charge and processes the charge if applicable.
      * @param subscriptionIndex The index of the subscription to be charged.
      */
-    function handleSubscriptionCharge(uint256 subscriptionIndex) external onlyAuthorized {
+    function handleSubscriptionCharge(uint256 subscriptionIndex) external {
         Subscription memory subscription = getSubscriptionAtIndex(subscriptionIndex);
         if (
             (subscription.status != Status.Active && subscription.status != Status.Pending)
@@ -493,7 +491,7 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
      */
     function scheduleSubscription(uint256 subscriptionIndex, Subscription memory subscription) private {
         if (subscription.nextChargeTimestamp > 0) {
-            uint256 nextChargeTimestampDay = subscription.nextChargeTimestamp / 1 days * 1 days;
+            uint256 nextChargeTimestampDay = (subscription.nextChargeTimestamp / 1 days) * 1 days;
             s_subscriptionsByChargeDay[nextChargeTimestampDay].push(subscriptionIndex);
         }
     }
@@ -545,6 +543,8 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
             emit SubscriptionCharged(subscription.account, subscription.billingCycle, subscription.token, tokenAmount);
 
             token.safeTransferFrom(subscription.account, address(this), tokenAmount);
+
+            i_memberBeatToken.mint(subscription.account, tokenAmount);
 
             if (i_serviceProviderFee > 0) {
                 uint256 serviceProviderFee = calculateServiceProviderFee(tokenAmount);

@@ -20,6 +20,7 @@ import {TokenPriceFeedRegistry} from "src/registry/TokenPriceFeedRegistry.sol";
 import {MockV3Aggregator} from "test/mocks/MockV3Aggregator.t.sol";
 import {ERC20Mock} from "test/mocks/ERC20Mock.t.sol";
 import {TestingUtils} from "test/mocks/TestingUtils.t.sol";
+import {MemberBeatToken} from "@memberbeat-token/MemberBeatToken.sol";
 
 contract HelperConfig is Script, TestingUtils {
     struct NetworkConfig {
@@ -27,6 +28,7 @@ contract HelperConfig is Script, TestingUtils {
         address serviceProvider;
         address[] tokens;
         address[] priceFeeds;
+        address memberBeatToken;
     }
 
     NetworkConfig activeConfig;
@@ -54,6 +56,7 @@ contract HelperConfig is Script, TestingUtils {
     function getArbitrumSepoliaEthConfig() public returns (NetworkConfig memory) {
         address account = address(uint160(vm.envUint("OWNER_ACCOUNT")));
         address serviceProvider = address(uint160(vm.envUint("SERVICE_PROVIDER_ACCOUNT")));
+        address memberBeatToken = address(uint160(vm.envUint("ARBITRUM_SEPOLIA_MEMBERBEAT_TOKEN")));
 
         console.log("Arbitrum account", account);
         console.log("Arbitrum provider", serviceProvider);
@@ -65,7 +68,8 @@ contract HelperConfig is Script, TestingUtils {
             account: account,
             serviceProvider: serviceProvider,
             tokens: _tokens,
-            priceFeeds: _priceFeeds
+            priceFeeds: _priceFeeds,
+            memberBeatToken: memberBeatToken
         });
         return activeConfig;
     }
@@ -75,12 +79,17 @@ contract HelperConfig is Script, TestingUtils {
             return activeConfig;
         }
 
-        vm.startBroadcast();
+        address account = address(uint160(vm.envUint("ANVIL_ACCOUNT")));
+        address serviceProvider = address(uint160(vm.envUint("ANVIL_SERVICE_PROVIDER_ACCOUNT")));
+
+        vm.startBroadcast(account);
         MockV3Aggregator ethFiatPriceFeed = new MockV3Aggregator(DECIMALS, int256(ETH_FIAT_PRICE));
         ERC20Mock ethMock = new ERC20Mock("Ethereum", "wETH", msg.sender, 1000e8);
 
         MockV3Aggregator btcFiatPriceFeed = new MockV3Aggregator(DECIMALS, int256(BTC_FIAT_PRICE));
         ERC20Mock btcMock = new ERC20Mock("Bitcoin", "wBTC", msg.sender, 1000e8);
+
+        MemberBeatToken memberBeatToken = new MemberBeatToken("MemberBeat Token", "MBT");
         vm.stopBroadcast();
 
         tokens.push(address(ethMock));
@@ -89,10 +98,13 @@ contract HelperConfig is Script, TestingUtils {
         tokens.push(address(btcMock));
         priceFeeds.push(address(btcFiatPriceFeed));
 
-        address account = address(uint160(vm.envUint("ANVIL_ACCOUNT")));
-        address serviceProvider = address(uint160(vm.envUint("ANVIL_SERVICE_PROVIDER_ACCOUNT")));
-        activeConfig =
-            NetworkConfig({account: account, serviceProvider: serviceProvider, tokens: tokens, priceFeeds: priceFeeds});
+        activeConfig = NetworkConfig({
+            account: account,
+            serviceProvider: serviceProvider,
+            tokens: tokens,
+            priceFeeds: priceFeeds,
+            memberBeatToken: address(memberBeatToken)
+        });
 
         return activeConfig;
     }

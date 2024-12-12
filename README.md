@@ -10,6 +10,8 @@ The `MemberBeatSubscriptionManager` contract is designed to manage subscription 
 - **Automated Charging**: Subscriptions are automatically charged using Chainlink Upkeeps. The "Time-Based" Upkeep ensures periodic charges, while the "Log Trigger" Upkeep handles event-based charges.
 - **Billing Plan Management**: The owner can create, update, and delete subscription plans, as well as manage billing plans within those plans. This allows for flexible subscription models tailored to different needs.
 - **Token Integration**: The contract supports multiple tokens for subscription payments, integrating with the `TokenPriceFeedRegistry` to convert fiat prices to token amounts.
+- **Rewards for Subscription**: Each time a user subscribes, they get rewarded with the exact same amount of MemberBeatToken (MBT) proportionally to the amount of tokens spent.
+- **Use of MBT Tokens**: MBT tokens can be later used by users within the plans they subscribed to. For example, they can spend MBT tokens for usage of certain services inside a given plan, etc.
 
 ### Owner Capabilities
 
@@ -20,8 +22,6 @@ The owner of the contract has several key capabilities to manage subscription se
 - **Delete Subscription Plans**: The owner can delete subscription plans that are no longer needed, ensuring the service remains up-to-date and relevant.
 - **Manage Billing Plans**: Billing plans within subscription plans can be added, updated, or removed by the owner, providing flexibility in subscription offerings.
 - **Token Management**: The owner can view and manage the tokens used for subscription payments. After tokens are charged, they can be transferred to the owner's wallet using the `claimTokens` function, which ensures all charged tokens are handled efficiently.
-
-### Integration with External Registries
 
 The contract integrates with the `SubscriptionPlansRegistry` and `TokenPriceFeedRegistry` to manage subscription plans and token price feeds. This integration allows for dynamic and flexible subscription models, supporting a wide range of pricing and billing options.
 
