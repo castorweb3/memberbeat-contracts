@@ -97,9 +97,14 @@ contract HelperConfig is Script, TestingUtils {
 
         tokens.push(address(btcMock));
         priceFeeds.push(address(btcFiatPriceFeed));
-        
-        activeConfig =
-            NetworkConfig({account: account, serviceProvider: serviceProvider, tokens: tokens, priceFeeds: priceFeeds, memberBeatToken: address(memberBeatToken)});
+
+        activeConfig = NetworkConfig({
+            account: account,
+            serviceProvider: serviceProvider,
+            tokens: tokens,
+            priceFeeds: priceFeeds,
+            memberBeatToken: address(memberBeatToken)
+        });
 
         return activeConfig;
     }

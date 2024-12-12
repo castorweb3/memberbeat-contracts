@@ -375,8 +375,8 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         approvesToken(RANDOM_USER, token1, ONE_MONTH_BILLING_PLAN_INDEX)
         fiatSubscribes(RANDOM_USER, token1, PLAN_ID, ONE_MONTH_BILLING_PLAN_INDEX)
     {
-        vm.startPrank(config.account);                        
-        
+        vm.startPrank(config.account);
+
         address[] memory chargedTokens = subscriptionManager.getChargedTokenAddresses();
         uint256 chargedTokensCount = chargedTokens.length;
         bool found = false;
@@ -386,7 +386,7 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
             }
         }
         assert(found);
-        vm.stopPrank();        
+        vm.stopPrank();
     }
 
     function testGetSubscribeRevertsIfUserNotSubscribed()
@@ -720,15 +720,14 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         approvesToken(RANDOM_USER, token1, ONE_MONTH_BILLING_PLAN_INDEX)
         fiatSubscribes(RANDOM_USER, token1, PLAN_ID, ONE_MONTH_BILLING_PLAN_INDEX)
     {
-        vm.startPrank(config.account);                
+        vm.startPrank(config.account);
         vm.expectRevert(
             abi.encodeWithSelector(
-                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__TokenBalanceZero.selector,
-                token2     
+                IMemberBeatSubscriptionManager.MemberBeatSubscriptionManager__TokenBalanceZero.selector, token2
             )
         );
-        subscriptionManager.claimTokenBalance(token2);        
-        vm.stopPrank();        
+        subscriptionManager.claimTokenBalance(token2);
+        vm.stopPrank();
     }
 
     function testClaimTokenBalanceEmitsTokenBalanceClaimedEvent()
@@ -739,9 +738,9 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
     {
         uint256 expectedBalance = IERC20(token1).balanceOf(address(subscriptionManager));
 
-        vm.startPrank(config.account);                        
-        subscriptionManager.claimTokenBalance(token1);        
-        vm.stopPrank();        
+        vm.startPrank(config.account);
+        subscriptionManager.claimTokenBalance(token1);
+        vm.stopPrank();
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
         (Vm.Log memory tokenBalanceClaimedEvent, bool found) =
@@ -760,9 +759,9 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
         approvesToken(RANDOM_USER, token1, ONE_MONTH_BILLING_PLAN_INDEX)
         fiatSubscribes(RANDOM_USER, token1, PLAN_ID, ONE_MONTH_BILLING_PLAN_INDEX)
     {
-        vm.startPrank(config.account);                        
-        subscriptionManager.claimTokenBalance(token1);        
-        
+        vm.startPrank(config.account);
+        subscriptionManager.claimTokenBalance(token1);
+
         address[] memory chargedTokens = subscriptionManager.getChargedTokenAddresses();
         uint256 chargedTokensCount = chargedTokens.length;
         bool found = false;
@@ -772,6 +771,6 @@ contract SubscriptionManagerIntegrationTest is Test, MemberBeatDataTypes, Testin
             }
         }
         assert(!found);
-        vm.stopPrank();        
+        vm.stopPrank();
     }
 }

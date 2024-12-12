@@ -245,11 +245,11 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
      * @dev This function can only be called by the contract owner.
      * @dev Since this function is for the owner only, and the tokens are in our control, it is safe to loop through the array and delete.
      * @dev Emits the TokenBalanceClaimed event indicating the token address and balance transferred.
-     * @param _token The address of the token to be transferred and removed from the charged token addresses list.     
+     * @param _token The address of the token to be transferred and removed from the charged token addresses list.
      */
     function claimTokenBalance(address _token) external onlyOwner {
         IERC20 token = IERC20(_token);
-        uint256 balance = token.balanceOf(address(this));        
+        uint256 balance = token.balanceOf(address(this));
         if (balance == 0) {
             revert MemberBeatSubscriptionManager__TokenBalanceZero(_token);
         }
@@ -257,7 +257,7 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
         emit TokenBalanceClaimed(_token, balance);
 
         token.safeTransfer(owner(), balance);
-        
+
         for (uint256 i = 0; i < s_chargedTokenAddresses.length; i++) {
             if (s_chargedTokenAddresses[i] == _token) {
                 s_chargedTokenAddresses[i] = s_chargedTokenAddresses[s_chargedTokenAddresses.length - 1];
