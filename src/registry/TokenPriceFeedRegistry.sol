@@ -24,7 +24,6 @@ import {MemberBeatDataTypes} from "src/common/MemberBeatDataTypes.sol";
  * @dev This contract allows adding, updating, and retrieving price feed addresses for tokens, as well as converting fiat amounts to token amounts.
  */
 contract TokenPriceFeedRegistry is MemberBeatDataTypes {
-    
     mapping(address => TokenPriceFeed) private s_tokenPriceFeeds;
     mapping(address => bool) private s_validTokens;
     address[] private s_tokens;
@@ -42,7 +41,8 @@ contract TokenPriceFeedRegistry is MemberBeatDataTypes {
         if (s_validTokens[_tokenAddress]) {
             revert TokenPriceFeedRegistry__TokenAlreadyRegistered(_tokenAddress);
         }
-        s_tokenPriceFeeds[_tokenAddress] = TokenPriceFeed({tokenAddress: _tokenAddress, priceFeedAddress: _priceFeedAddress});
+        s_tokenPriceFeeds[_tokenAddress] =
+            TokenPriceFeed({tokenAddress: _tokenAddress, priceFeedAddress: _priceFeedAddress});
         s_validTokens[_tokenAddress] = true;
         s_tokens.push(_tokenAddress);
     }
@@ -107,7 +107,7 @@ contract TokenPriceFeedRegistry is MemberBeatDataTypes {
                 }
             }
         }
-        
+
         for (uint256 i = 0; i < _tokenPriceFeeds.length; i++) {
             TokenPriceFeed memory tokenPriceFeed = _tokenPriceFeeds[i];
             if (tokenPriceFeed.tokenAddress == address(0) || tokenPriceFeed.priceFeedAddress == address(0)) {

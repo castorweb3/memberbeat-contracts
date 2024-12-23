@@ -90,7 +90,7 @@ interface IMemberBeatSubscriptionManager is MemberBeatDataTypes {
      * @param _planName The updated name of the plan.
      * @param _billingPlans The updated billing plans associated with the plan.
      */
-    function updatePlan(uint256 _planId, string memory _planName, BillingPlan[] memory _billingPlans) external;    
+    function updatePlan(uint256 _planId, string memory _planName, BillingPlan[] memory _billingPlans) external;
 
     /**
      * @notice Deletes an existing plan.
@@ -101,7 +101,7 @@ interface IMemberBeatSubscriptionManager is MemberBeatDataTypes {
     /**
      * @notice Synchorinizes provided plans with the existing ones.
      * @dev If the existing plan was not found in the _plans array, it will be removed
-     * @param _plans The array of plans to be synced     
+     * @param _plans The array of plans to be synced
      */
     function syncPlans(Plan[] memory _plans) external;
 

@@ -205,7 +205,7 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
     /**
      * @notice Synchorinizes provided plans with the existing ones.
      * @dev If the existing plan was not found in the _plans array, it will be removed
-     * @param _plans The array of plans to be synced     
+     * @param _plans The array of plans to be synced
      */
     function syncPlans(Plan[] memory _plans) external onlyOwner {
         i_subscriptionPlansRegistry.syncPlans(_plans);

@@ -135,8 +135,7 @@ contract PriceFeedRegistryUnitTest is Test, TestingUtils {
         subscriptionManager.syncTokenPriceFeeds(new TokenPriceFeed[](0));
     }
 
-    function testSyncTokenPriceFeedsSynchronizesTheTokenPriceFeeds() public addedTokenPriceFeed {                        
-
+    function testSyncTokenPriceFeedsSynchronizesTheTokenPriceFeeds() public addedTokenPriceFeed {
         TokenPriceFeed[] memory tokens4firstSync = new TokenPriceFeed[](3);
         tokens4firstSync[0] = TokenPriceFeed({tokenAddress: TOKEN_ADDRESS, priceFeedAddress: NEW_PRICE_FEED_ADDRESS});
         tokens4firstSync[1] = TokenPriceFeed({tokenAddress: TOKEN_ADDRESS_2, priceFeedAddress: PRICE_FEED_ADDRESS_2});
@@ -152,10 +151,9 @@ contract PriceFeedRegistryUnitTest is Test, TestingUtils {
         address priceFeedAddress3 = subscriptionManager.getTokenPriceFeed(TOKEN_ADDRESS_3);
         assertEq(priceFeedAddress3, PRICE_FEED_ADDRESS_3);
 
-
         // Plan[] memory plans4secondSync = new Plan[](3);
         // plans4secondSync[0] = Plan({planId: PLAN_ID, planName: NEW_PLAN_NAME, billingPlans: billingPlans});
-        // plans4secondSync[1] = Plan({planId: PLAN_ID_2, planName: PLAN_NAME_2, billingPlans: billingPlans});        
+        // plans4secondSync[1] = Plan({planId: PLAN_ID_2, planName: PLAN_NAME_2, billingPlans: billingPlans});
 
         // vm.prank(config.account);
         // subscriptionManager.syncPlans(plans4secondSync);
@@ -165,7 +163,7 @@ contract PriceFeedRegistryUnitTest is Test, TestingUtils {
         //         TokenPriceFeedRegistry.TokenPriceFeedRegistry__TokenNotRegistered.selector, PLAN_ID_3
         //     )
         // );
-        // subscriptionManager.getPlan(PLAN_ID_3);        
+        // subscriptionManager.getPlan(PLAN_ID_3);
     }
 
     function testGetLatestPriceRevertsIfInvalidToken() public {
