@@ -38,4 +38,7 @@ deploy-sepolia:
 	@forge script script/DeploySubscriptionManager.s.sol --rpc-url $(SEPOLIA_RPC_URL) --account $(ACCOUNT) --sender $(SENDER) --etherscan-api-key $(ETHERSCAN_API_KEY) --broadcast --verify
 
 deploy-arbitrum-sepolia:
-	@forge script script/DeploySubscriptionManager.s.sol --rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) --account $(ACCOUNT) --etherscan-api-key $(ETHERSCAN_API_KEY) --broadcast --verify -vvvv
+	@forge script script/DeploySubscriptionManager.s.sol --rpc-url $(ARBITRUM_SEPOLIA_RPC_URL) --account $(ACCOUNT) --etherscan-api-key $(ARBISCAN_API_KEY) --broadcast --verify -vvvv
+
+deploy-optimism-sepolia:
+	@forge script script/DeploySubscriptionManager.s.sol --rpc-url $(OPTIMISM_SEPOLIA_RPC_URL) --account $(ACCOUNT) --etherscan-api-key $(OPTIMISM_ETHERSCAN_API_KEY) --broadcast --verify -vvvv

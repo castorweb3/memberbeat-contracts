@@ -33,6 +33,12 @@ contract PriceFeedRegistryUnitTest is Test, TestingUtils {
     address TOKEN_ADDRESS = makeAddr("tokenAddress");
     address PRICE_FEED_ADDRESS = makeAddr("priceFeedAddress");
 
+    address TOKEN_ADDRESS_2 = makeAddr("tokenAddress2");
+    address PRICE_FEED_ADDRESS_2 = makeAddr("priceFeedAddress2");
+
+    address TOKEN_ADDRESS_3 = makeAddr("tokenAddress3");
+    address PRICE_FEED_ADDRESS_3 = makeAddr("priceFeedAddress3");
+
     address NEW_PRICE_FEED_ADDRESS = makeAddr("newPriceFeedAddress");
 
     function setUp() public {
@@ -47,6 +53,22 @@ contract PriceFeedRegistryUnitTest is Test, TestingUtils {
         vm.prank(config.account);
         subscriptionManager.addTokenPriceFeed(TOKEN_ADDRESS, PRICE_FEED_ADDRESS);
         _;
+    }
+
+    function testGetTokenPriceFeedRevertsIfTokenNotRegistered() public addedTokenPriceFeed {
+        vm.prank(config.account);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                TokenPriceFeedRegistry.TokenPriceFeedRegistry__TokenNotRegistered.selector, RANDOM_TOKEN
+            )
+        );
+        subscriptionManager.getTokenPriceFeed(RANDOM_TOKEN);
+    }
+
+    function testGetTokenPriceFeedReturnsThePriceFeed() public addedTokenPriceFeed {
+        vm.prank(config.account);
+        address priceFeedAddress = subscriptionManager.getTokenPriceFeed(TOKEN_ADDRESS);
+        assertEq(priceFeedAddress, PRICE_FEED_ADDRESS);
     }
 
     function testAddTokenPriceFeedRevertsIfNotOwner() public {
@@ -105,6 +127,43 @@ contract PriceFeedRegistryUnitTest is Test, TestingUtils {
 
         bool isRegistered = subscriptionManager.isTokenRegistered(TOKEN_ADDRESS);
         assertEq(isRegistered, false);
+    }
+
+    function testSyncTokenPriceFeedsRevertsIfNotOwner() public {
+        vm.prank(RANDOM_USER);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, RANDOM_USER));
+        subscriptionManager.syncTokenPriceFeeds(new TokenPriceFeed[](0));
+    }
+
+    function testSyncTokenPriceFeedsSynchronizesTheTokenPriceFeeds() public addedTokenPriceFeed {
+        TokenPriceFeed[] memory tokens4firstSync = new TokenPriceFeed[](3);
+        tokens4firstSync[0] = TokenPriceFeed({tokenAddress: TOKEN_ADDRESS, priceFeedAddress: NEW_PRICE_FEED_ADDRESS});
+        tokens4firstSync[1] = TokenPriceFeed({tokenAddress: TOKEN_ADDRESS_2, priceFeedAddress: PRICE_FEED_ADDRESS_2});
+        tokens4firstSync[2] = TokenPriceFeed({tokenAddress: TOKEN_ADDRESS_3, priceFeedAddress: PRICE_FEED_ADDRESS_3});
+
+        vm.prank(config.account);
+        subscriptionManager.syncTokenPriceFeeds(tokens4firstSync);
+
+        address priceFeedAddress1 = subscriptionManager.getTokenPriceFeed(TOKEN_ADDRESS);
+        assertEq(priceFeedAddress1, NEW_PRICE_FEED_ADDRESS);
+        address priceFeedAddress2 = subscriptionManager.getTokenPriceFeed(TOKEN_ADDRESS_2);
+        assertEq(priceFeedAddress2, PRICE_FEED_ADDRESS_2);
+        address priceFeedAddress3 = subscriptionManager.getTokenPriceFeed(TOKEN_ADDRESS_3);
+        assertEq(priceFeedAddress3, PRICE_FEED_ADDRESS_3);
+
+        // Plan[] memory plans4secondSync = new Plan[](3);
+        // plans4secondSync[0] = Plan({planId: PLAN_ID, planName: NEW_PLAN_NAME, billingPlans: billingPlans});
+        // plans4secondSync[1] = Plan({planId: PLAN_ID_2, planName: PLAN_NAME_2, billingPlans: billingPlans});
+
+        // vm.prank(config.account);
+        // subscriptionManager.syncPlans(plans4secondSync);
+
+        // vm.expectRevert(
+        //     abi.encodeWithSelector(
+        //         TokenPriceFeedRegistry.TokenPriceFeedRegistry__TokenNotRegistered.selector, PLAN_ID_3
+        //     )
+        // );
+        // subscriptionManager.getPlan(PLAN_ID_3);
     }
 
     function testGetLatestPriceRevertsIfInvalidToken() public {

@@ -55,6 +55,9 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
     // @dev The array is reset after the balances are transferred
     address[] private s_chargedTokenAddresses;
 
+    // Address of the MemberBeatToken contract
+    IMemberBeatToken private s_memberBeatToken;
+
     // Reference to the SubscriptionPlansRegistry contract
     SubscriptionPlansRegistry private immutable i_subscriptionPlansRegistry;
 
@@ -63,9 +66,6 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
 
     // Address of the service provider
     address private immutable i_serviceProvider;
-
-    // Address of the MemberBeatToken contract
-    IMemberBeatToken private immutable i_memberBeatToken;
 
     // Fee charged by the service provider
     int256 private immutable i_serviceProviderFee;
@@ -78,11 +78,31 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
             revert MemberBeatSubscriptionManager__InvalidServiceProviderAddress();
         }
 
+        if (_memberBeatToken == address(0)) {
+            revert MemberBeatSubscriptionManager__InvalidMemberBeatTokenAddress();
+        }
+
+        s_memberBeatToken = IMemberBeatToken(_memberBeatToken);
+
         i_subscriptionPlansRegistry = new SubscriptionPlansRegistry();
         i_tokenPriceFeedRegistry = new TokenPriceFeedRegistry();
         i_serviceProvider = _serviceProvider;
-        i_memberBeatToken = IMemberBeatToken(_memberBeatToken);
         i_serviceProviderFee = _serviceProviderFee;
+    }
+
+    /**
+     * @return Returns the MemberBeatToken address
+     */
+    function getMemberBeatToken() external view returns (address) {
+        return address(s_memberBeatToken);
+    }
+
+    /**
+     * @dev Updates the MemberBeatToken address
+     * @param _memberBeatToken The address of the MemberBeatToken
+     */
+    function setMemberBeatToken(address _memberBeatToken) external onlyOwner {
+        s_memberBeatToken = IMemberBeatToken(_memberBeatToken);
     }
 
     /**
@@ -183,6 +203,15 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
     }
 
     /**
+     * @notice Synchorinizes provided plans with the existing ones.
+     * @dev If the existing plan was not found in the _plans array, it will be removed
+     * @param _plans The array of plans to be synced
+     */
+    function syncPlans(Plan[] memory _plans) external onlyOwner {
+        i_subscriptionPlansRegistry.syncPlans(_plans);
+    }
+
+    /**
      * @notice Retrieves a plan by its ID.
      * @param _planId The ID of the plan to retrieve.
      * @return Returns the plan details.
@@ -278,6 +307,16 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
     }
 
     /**
+     * @notice Retrieves the price feed address for a token.
+     * @param _tokenAddress The address of the token.
+     * @return The address of the price feed.
+     * @dev Reverts if the token is not registered.
+     */
+    function getTokenPriceFeed(address _tokenAddress) external view returns (address) {
+        return i_tokenPriceFeedRegistry.getTokenPriceFeed(_tokenAddress);
+    }
+
+    /**
      * @notice Adds a price feed address for a token.
      * @param _tokenAddress The address of the token.
      * @param _priceFeedAddress The address of the price feed.
@@ -301,6 +340,15 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
      */
     function deleteTokenPriceFeed(address _tokenAddress) external onlyOwner {
         i_tokenPriceFeedRegistry.deleteTokenPriceFeed(_tokenAddress);
+    }
+
+    /**
+     * @notice Synchronizes provided token price feeds with the existing ones.
+     * @dev If the existing token price feed was not found in the _tokenPriceFeeds array, it will be removed
+     * @param _tokenPriceFeeds The array of token price feeds to be synced
+     */
+    function syncTokenPriceFeeds(TokenPriceFeed[] memory _tokenPriceFeeds) external onlyOwner {
+        i_tokenPriceFeedRegistry.syncTokenPriceFeeds(_tokenPriceFeeds);
     }
 
     /**
@@ -544,7 +592,7 @@ contract MemberBeatSubscriptionManager is IMemberBeatSubscriptionManager, Ownabl
 
             token.safeTransferFrom(subscription.account, address(this), tokenAmount);
 
-            i_memberBeatToken.mint(subscription.account, tokenAmount);
+            s_memberBeatToken.mint(subscription.account, tokenAmount);
 
             if (i_serviceProviderFee > 0) {
                 uint256 serviceProviderFee = calculateServiceProviderFee(tokenAmount);

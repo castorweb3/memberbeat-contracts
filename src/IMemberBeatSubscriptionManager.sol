@@ -23,6 +23,7 @@ import {MemberBeatDataTypes} from "src/common/MemberBeatDataTypes.sol";
  */
 interface IMemberBeatSubscriptionManager is MemberBeatDataTypes {
     error MemberBeatSubscriptionManager__InvalidServiceProviderAddress();
+    error MemberBeatSubscriptionManager__InvalidMemberBeatTokenAddress();
     error MemberBeatSubscriptionManager__InvalidSubscriptionData();
     error MemberBeatSubscriptionManager__AlreadySubscribed(address account, uint256 planId);
     error MemberBeatSubscriptionManager__NotSubscribed(address account, uint256 planId);
@@ -45,6 +46,17 @@ interface IMemberBeatSubscriptionManager is MemberBeatDataTypes {
     event SubscriptionCancelled(address indexed account, uint256 indexed planId);
     event SubscriptionDueForCharge(uint256 indexed subscriptionIndex);
     event TokenBalanceClaimed(address indexed token, uint256 indexed balance);
+
+    /**
+     * @return Returns the MemberBeatToken address
+     */
+    function getMemberBeatToken() external returns (address);
+
+    /**
+     * @dev Updates the MemberBeatToken address
+     * @param _memberBeatToken The address of the MemberBeatToken
+     */
+    function setMemberBeatToken(address _memberBeatToken) external;
 
     /**
      * @notice Subscribes a user to a plan.
@@ -85,6 +97,13 @@ interface IMemberBeatSubscriptionManager is MemberBeatDataTypes {
      * @param _planId The ID of the plan to delete.
      */
     function deletePlan(uint256 _planId) external;
+
+    /**
+     * @notice Synchorinizes provided plans with the existing ones.
+     * @dev If the existing plan was not found in the _plans array, it will be removed
+     * @param _plans The array of plans to be synced
+     */
+    function syncPlans(Plan[] memory _plans) external;
 
     /**
      * @notice Retrieves a plan by its ID.
@@ -135,6 +154,14 @@ interface IMemberBeatSubscriptionManager is MemberBeatDataTypes {
     function claimTokenBalance(address _token) external;
 
     /**
+     * @notice Retrieves the price feed address for a token.
+     * @param _tokenAddress The address of the token.
+     * @return The address of the price feed.
+     * @dev Reverts if the token is not registered.
+     */
+    function getTokenPriceFeed(address _tokenAddress) external returns (address);
+
+    /**
      * @notice Adds a price feed address for a token.
      * @param _tokenAddress The address of the token.
      * @param _priceFeedAddress The address of the price feed.
@@ -153,6 +180,13 @@ interface IMemberBeatSubscriptionManager is MemberBeatDataTypes {
      * @param _tokenAddress The address of the token.
      */
     function deleteTokenPriceFeed(address _tokenAddress) external;
+
+    /**
+     * @notice Synchronizes provided token price feeds with the existing ones.
+     * @dev If the existing token price feed was not found in the _tokenPriceFeeds array, it will be removed
+     * @param _tokenPriceFeeds The array of token price feeds to be synced
+     */
+    function syncTokenPriceFeeds(TokenPriceFeed[] memory _tokenPriceFeeds) external;
 
     /**
      * @notice Checks if a token is registered.
