@@ -16,19 +16,16 @@
 pragma solidity 0.8.20;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/v0.8/interfaces/AggregatorV3Interface.sol";
+import {MemberBeatDataTypes} from "src/common/MemberBeatDataTypes.sol";
 
 /**
  * @title TokenPriceFeedRegistry
  * @notice Manages price feed addresses for various tokens and provides utility functions for price conversion.
  * @dev This contract allows adding, updating, and retrieving price feed addresses for tokens, as well as converting fiat amounts to token amounts.
  */
-contract TokenPriceFeedRegistry {
-    struct PriceFeed {
-        address tokenAddress;
-        address priceFeedAddress;
-    }
-
-    mapping(address => PriceFeed) private s_tokenPriceFeeds;
+contract TokenPriceFeedRegistry is MemberBeatDataTypes {
+    
+    mapping(address => TokenPriceFeed) private s_tokenPriceFeeds;
     mapping(address => bool) private s_validTokens;
     address[] private s_tokens;
 
@@ -45,7 +42,7 @@ contract TokenPriceFeedRegistry {
         if (s_validTokens[_tokenAddress]) {
             revert TokenPriceFeedRegistry__TokenAlreadyRegistered(_tokenAddress);
         }
-        s_tokenPriceFeeds[_tokenAddress] = PriceFeed({tokenAddress: _tokenAddress, priceFeedAddress: _priceFeedAddress});
+        s_tokenPriceFeeds[_tokenAddress] = TokenPriceFeed({tokenAddress: _tokenAddress, priceFeedAddress: _priceFeedAddress});
         s_validTokens[_tokenAddress] = true;
         s_tokens.push(_tokenAddress);
     }
@@ -81,6 +78,47 @@ contract TokenPriceFeedRegistry {
                 s_tokens[i] = s_tokens[s_tokens.length - 1];
                 s_tokens.pop();
                 break;
+            }
+        }
+    }
+
+    /**
+     * @notice Synchronizes provided token price feeds with the existing ones.
+     * @dev If the existing token price feed was not found in the _tokenPriceFeeds array, it will be removed
+     * @param _tokenPriceFeeds The array of token price feeds to be synced
+     */
+    function syncTokenPriceFeeds(TokenPriceFeed[] memory _tokenPriceFeeds) public {
+        uint256 totalTokens = s_tokens.length;
+
+        if (totalTokens > 0) {
+            for (uint256 i = totalTokens; i > 0; i--) {
+                address existingToken = s_tokens[i - 1];
+                bool found = false;
+
+                for (uint256 j = 0; j < _tokenPriceFeeds.length; j++) {
+                    if (_tokenPriceFeeds[j].tokenAddress == existingToken) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    deleteTokenPriceFeed(existingToken);
+                }
+            }
+        }
+        
+        for (uint256 i = 0; i < _tokenPriceFeeds.length; i++) {
+            TokenPriceFeed memory tokenPriceFeed = _tokenPriceFeeds[i];
+            if (tokenPriceFeed.tokenAddress == address(0) || tokenPriceFeed.priceFeedAddress == address(0)) {
+                continue;
+            }
+
+            TokenPriceFeed storage existingTokenPriceFeed = s_tokenPriceFeeds[tokenPriceFeed.tokenAddress];
+            if (existingTokenPriceFeed.tokenAddress == address(0)) {
+                addTokenPriceFeed(tokenPriceFeed.tokenAddress, tokenPriceFeed.priceFeedAddress);
+            } else {
+                updateTokenPriceFeed(tokenPriceFeed.tokenAddress, tokenPriceFeed.priceFeedAddress);
             }
         }
     }
@@ -134,7 +172,7 @@ contract TokenPriceFeedRegistry {
      * @return The address of the price feed.
      * @dev Reverts if the token is not registered.
      */
-    function getTokenPriceFeed(address _tokenAddress) private view returns (address) {
+    function getTokenPriceFeed(address _tokenAddress) public view returns (address) {
         if (!s_validTokens[_tokenAddress]) {
             revert TokenPriceFeedRegistry__TokenNotRegistered(_tokenAddress);
         }

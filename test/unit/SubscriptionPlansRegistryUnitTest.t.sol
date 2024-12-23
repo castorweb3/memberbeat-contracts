@@ -188,6 +188,46 @@ contract SubscriptionPlansRegistryUnitTest is Test, MemberBeatDataTypes, Testing
         assertEq(planId, PLAN_ID);
     }
 
+    function testSyncPlansRevertsIfNotOwner() public {
+        vm.prank(RANDOM_USER);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, RANDOM_USER));
+        subscriptionManager.syncPlans(new Plan[](0));
+    }
+
+    function testSyncPlanSynchronizesThePlans() public createdPlan addedFiatBillingPlan {
+                
+        BillingPlan[] memory billingPlans = new BillingPlan[](1);
+        billingPlans[0] = fiatBillingPlan;
+
+        Plan[] memory plans4firstSync = new Plan[](3);
+        plans4firstSync[0] = Plan({planId: PLAN_ID, planName: NEW_PLAN_NAME, billingPlans: billingPlans});
+        plans4firstSync[1] = Plan({planId: PLAN_ID_2, planName: PLAN_NAME_2, billingPlans: billingPlans});
+        plans4firstSync[2] = Plan({planId: PLAN_ID_3, planName: PLAN_NAME_3, billingPlans: billingPlans});
+
+        vm.prank(config.account);
+        subscriptionManager.syncPlans(plans4firstSync);
+
+        Plan memory plan1 = subscriptionManager.getPlan(PLAN_ID);
+        assertEq(plan1.planName, NEW_PLAN_NAME);
+        Plan memory plan2 = subscriptionManager.getPlan(PLAN_ID_2);
+        assertEq(plan2.planName, PLAN_NAME_2);
+
+
+        Plan[] memory plans4secondSync = new Plan[](3);
+        plans4secondSync[0] = Plan({planId: PLAN_ID, planName: NEW_PLAN_NAME, billingPlans: billingPlans});
+        plans4secondSync[1] = Plan({planId: PLAN_ID_2, planName: PLAN_NAME_2, billingPlans: billingPlans});        
+
+        vm.prank(config.account);
+        subscriptionManager.syncPlans(plans4secondSync);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SubscriptionPlansRegistry.SubscriptionPlansRegistry__PlanNotFound.selector, PLAN_ID_3
+            )
+        );
+        subscriptionManager.getPlan(PLAN_ID_3);        
+    }
+
     function testAddBillingPlanRevertsIfNotOwner() public createdPlan {
         vm.prank(RANDOM_USER);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, RANDOM_USER));

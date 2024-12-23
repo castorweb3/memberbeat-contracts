@@ -45,8 +45,10 @@ abstract contract TestingUtils is Test, MemberBeatDataTypes {
 
     uint256 PLAN_ID = 1;
     uint256 PLAN_ID_2 = 2;
+    uint256 PLAN_ID_3 = 3;
     string PLAN_NAME = "Premium";
     string PLAN_NAME_2 = "Gold";
+    string PLAN_NAME_3 = "Silver";
     string NEW_PLAN_NAME = "Platinum";
     uint256 INVALID_PLAN_ID = 0;
 

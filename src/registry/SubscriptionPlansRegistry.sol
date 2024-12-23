@@ -167,6 +167,49 @@ contract SubscriptionPlansRegistry is MemberBeatDataTypes {
     }
 
     /**
+     * @notice Synchronizes provided plans with the existing ones.
+     * @dev If the existing plan was not found in the _plans array, it will be removed
+     * @param _plans The array of plans to be synced
+     */
+    function syncPlans(Plan[] memory _plans) public {
+        uint256 totalPlans = s_planIds.length;
+
+        if (totalPlans > 0) {
+            // Iterate backwards to safely remove items
+            for (uint256 i = totalPlans; i > 0; i--) {
+                uint256 index = i - 1;
+                uint256 existingPlanId = s_planIds[index];
+                bool found = false;
+
+                for (uint256 j = 0; j < _plans.length; j++) {
+                    if (_plans[j].planId == existingPlanId) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    deletePlan(existingPlanId);
+                }
+            }
+        }
+
+        for (uint256 i = 0; i < _plans.length; i++) {
+            Plan memory plan = _plans[i];
+            if (plan.planId == 0) {
+                continue;
+            }
+
+            Plan storage existingPlan = s_plans[plan.planId];
+            if (existingPlan.planId == 0) {
+                createPlan(plan.planId, plan.planName, plan.billingPlans);
+            } else {
+                updatePlan(plan.planId, plan.planName, plan.billingPlans);
+            }
+        }
+    }
+
+    /**
      * @notice Retrieves a subscription plan by its ID.
      * @param _planId The ID of the plan to retrieve.
      * @return The subscription plan details.

@@ -100,4 +100,14 @@ interface MemberBeatDataTypes {
         string planName;
         BillingPlan[] billingPlans;
     }
+
+    /**
+     * @notice Represents a token price feed
+     * @param tokenAddress address of the token
+     * @param priceFeedAddress address of the price feed
+     */
+    struct TokenPriceFeed {
+        address tokenAddress;
+        address priceFeedAddress;
+    }
 }

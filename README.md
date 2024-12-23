@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `MemberBeatSubscriptionManager` contract is designed to manage subscription services, allowing users to subscribe, manage subscriptions, and handle token-based payments. This contract provides a comprehensive and automated solution for subscription management, leveraging Chainlink "Time-Based" and "Log Trigger" Upkeeps to automatically charge subscriptions.
+The `MemberBeatSubscriptionManager` is a decentralized application (dApp) built on blockchain technology using Solidity to manage subscription services. This smart contract enables users to subscribe, manage their subscriptions, and handle token-based payments efficiently. It leverages Chainlink oracles for reliable data feeds and incorporates the new crypto token, MemberBeat Token (MBT), for various subscription-related transactions.
 
 ### Key Features
 
@@ -68,15 +68,39 @@ By automating subscription charges and providing robust management capabilities,
 
 This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
 
-## Demo Arbitrum Sepolia deployment
+## Testnet Deployments ##
+##### arbitrum-sepolia
+✅  [Success]Hash: 0x1a49e384647c5bea0eb0d2bdcdafbccf3d3bc5a24bb7b3f6270cc40b1a37e6b2
+Contract Address: 0x226Db0C403FDCaD100089d4bcb255794e96F5ec1
+Block: 107548715
+Paid: 0.000765067 ETH (7650670 gas * 0.1 gwei)
 
 ##### arbitrum-sepolia
-✅  [Success]Hash: 0xd1c3282a93d20ab54141d66a3ac6065454caf935bfd20062bb169f1d408aca0f
-Contract Address: 0x0D27195dC9c7196A0576F7582C09fA3d2D0B254d
-Block: 103421025
-Paid: 0.0005981722 ETH (5981722 gas * 0.1 gwei)
+✅  [Success]Hash: 0x7636108382501ae92c973b628772ef99aff21c621302801c31fe78d303288840
+Block: 107548719
+Paid: 0.0000064477 ETH (64477 gas * 0.1 gwei)
 
-✅ Sequence #1 on arbitrum-sepolia | Total Paid: 0.0005981722 ETH (5981722 gas * avg 0.1 gwei)
-                                                                                                                                                                                                                                 
-==========================
+✅ Sequence #1 on arbitrum-sepolia | Total Paid: 0.0007715147 ETH (7715147 gas * avg 0.1 gwei)
 
+ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
+
+We haven't found any matching bytecode for the following contracts: [0x2d7ff33cbf204f811387e5b85ab4ab4cf222c202, 0x6b2e0e1fa9d74f7abcc0994fcf64abb38222f879].
+
+This may occur when resuming a verification, but the underlying source code or compiler version has changed.
+##
+Start verification for (1) contracts
+Start verifying contract `0x226Db0C403FDCaD100089d4bcb255794e96F5ec1` deployed on arbitrum-sepolia
+
+Submitting verification for [src/MemberBeatSubscriptionManager.sol:MemberBeatSubscriptionManager] 0x226Db0C403FDCaD100089d4bcb255794e96F5ec1.
+Submitted contract for verification:
+        Response: `OK`
+        GUID: `fbfip5qcburjnrpxf567ckctn2jbmz2exqfvdal9rmwv7yj7wl`
+        URL: https://sepolia.arbiscan.io/address/0x226db0c403fdcad100089d4bcb255794e96f5ec1
+Contract verification status:
+Response: `NOTOK`
+Details: `Pending in queue`
+Contract verification status:
+Response: `OK`
+Details: `Pass - Verified`
+Contract successfully verified
+All (1) contracts were verified!
